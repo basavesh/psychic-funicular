@@ -1,0 +1,97 @@
+// param int MAX_HASH_BIT_COUNT_BYTES = 16;
+// param int MAX_HASH_BLOCK_SIZE = 128;
+param int EVP_MAX_MD_SIZE = 64;
+
+fn duplicate_msb_to_all(reg u64 x) -> reg u64 {
+  // should use arithmetic shift
+  // dummy code for now
+
+  reg u64 res;
+  res = x;
+  return res;
+}
+
+fn duplicate_msb_to_all_8(reg u64 x) -> reg u64 {
+  // should use arithmetic shift
+  // dummy code for now
+  
+  reg u64 res;
+  res = x;
+  return res;
+}
+
+export fn constant_time_lt(reg u64 a b) -> reg u64 {
+  reg u64 result;
+  result = a;
+  result -= b;
+  result = duplicate_msb_to_all(result);
+  return result;
+}
+
+export fn constant_time_ge(reg u64 a b) -> reg u64 {
+  reg u64 result;
+  result = a;
+  result -= b;
+  result = !result;
+  result = duplicate_msb_to_all(result);
+  return result;
+}
+
+/*
+export fn ssl3_cbc_copy_mac(reg u64 out data datalen md_size orig_len) {
+
+  // Assuming that CBC_MAC_ROTATE_IN_PLACE is defined
+
+  inline int i, j, k, l;
+  //reg u64 i, j;
+  reg u128 rotated_mac_buf;     // unsigned char rotated_mac_buf[64+EVP_MAX_MD_SIZE];
+  reg u64 rotated_mac; // pointer to rotated_mac
+
+  reg u64 mac_start, mac_end;
+  reg u64 scan_start;
+  reg u64 div_spoiler, rotate_offset;
+  stack u64 temp;
+
+  // assign some stuff
+  mac_end = datalen;
+  mac_start = mac_end - md_size;
+  scan_start = 0;
+
+  // rotated_mac = rotated_mac_buf + ((0-(size_t)rotated_mac_buf)&63);
+  rotated_mac = rotated_mac_buf + ((0-(64u)rotated_mac_buf) & 63);
+
+  // memset(rotated_mac, 0, md_size); 
+  // is there a memset or should I some sort of for loop
+  j = 0;
+  k = (int)scan_start;
+  l = (int)orig_len;
+  for i = k to l {
+
+  }
+  
+
+   // div_spoiler fix 
+  div_spoiler = md_size >> 1;
+  div_spoiler <<= 56;
+  rotate_offset = (div_spoiler + mac_start - scan_start) % md_size;
+
+}
+*/
+
+
+/*
+export fn encrypt_jasmin(reg u64 msg, reg u64 key) -> reg u64 {
+    reg u64 result;
+    result = msg;
+    return result;
+}
+
+
+export
+fn f64(reg u64 x, reg u64 y) -> reg u64 {
+  reg u64 z;
+  z = x;
+  z &= y;
+  return z;
+}
+*/

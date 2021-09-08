@@ -1,0 +1,36 @@
+export fn encrypt_jasmin(reg u64 msg, reg u64 key) -> reg u64 {
+    reg u64 result, result2;
+    reg u64 test;
+    reg u64 pstate;
+    reg u64 zmask;
+
+
+    pstate =    0xFFFFFFFFFFFFFFFF;
+    zmask  =    0x0000000000000000;
+    test =      0xabcddddddddddddd;
+    result = 0x1234;
+
+    if (msg == test) {
+        pstate = (msg==test) ? pstate : zmask;
+        // pstate = !(msg==test) ? zmask : pstate; // this doesn't work :/
+        //pstate = zmask if (msg==test);
+        result &= pstate;
+        
+    } else {
+        pstate = (msg == test) ? zmask : pstate;
+        result &= pstate;
+    }
+ 
+
+    result2 = result;
+    return result2;
+}
+
+
+export
+fn f64(reg u64 x, reg u64 y) -> reg u64 {
+  reg u64 z;
+  z = x;
+  z &= y;
+  return z;
+}

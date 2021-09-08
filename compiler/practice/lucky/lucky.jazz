@@ -1,0 +1,115 @@
+fn duplicate_msb_to_all(reg u64 x) -> reg u64 {
+  reg u64 res;
+  _, _, _, _, _, res = #SAR(x, 63);
+  return res;
+}
+
+fn constant_time_lt(reg u64 a b) -> reg u64 {
+  reg u64 result;
+  result = a;
+  result -= b;
+  result = duplicate_msb_to_all(result);
+  return result;
+}
+
+fn constant_time_ge(reg u64 a b) -> reg u64 {
+  reg u64 result;
+  result = a;
+  result -= b;
+  result = !result;
+  result = duplicate_msb_to_all(result);
+  return result;
+}
+
+
+export 
+fn 
+ssl3_cbc_copy_mac_jasmin(
+    reg u64 out,            // not sure if public
+    reg u64 data,           // actual record
+    reg u64 data_len,        // this should be private
+    reg u64 md_size,        // public
+    reg u64 orig_len        // public
+) {
+    // assuming CBC_MAC_ROTATE_IN_PLACE is defined 
+    stack u8[128] rotated_mac;    // char array
+    // reg u64 rotated_mac; // a pointer to array buff 
+    reg u64 mac_start;
+    reg u64 mac_end;
+    reg u64 scan_start;
+    reg u64 i, j;
+    reg u64 div_spoiler;
+    reg u64 rotate_offset;
+    reg u64 temp;
+    reg u64 temp2;
+    reg u8  temp_8;
+    reg u8  temp2_8;
+    reg u8 mac_started;    // FIX this
+    reg u8 mac_ended;      // FIX this
+    reg u8 b;
+
+
+
+    mac_end = data_len;
+    mac_start = mac_end;
+    mac_start -= md_size;
+    // rotated_mac = rotated_mac_buf_stack;
+    // ((0-(size_t)rotated_mac_buf)&63);
+    temp = md_size + 256;
+    
+    if (orig_len > temp) {
+        scan_start = orig_len;
+        scan_start -= temp;
+    }
+
+    // Moving the div_spoiler fix to later to shorten the lifespan of regs
+
+    // memset(rotated_mac, 0, md_size)
+    i = scan_start;
+    j = 0;
+    while (i < orig_len) {
+        //mac_started = constant_time_ge(i, mac_start);
+        temp = constant_time_ge(i, mac_start);
+        mac_started = (8u) temp;
+        // mac_ended = constant_time_ge(i, mac_end);
+        //temp2 = constant_time_ge(i, mac_end);
+        //mac_ended = (8u) temp2;
+        b = (u8)[data + i];
+        temp_8 = mac_started;
+        mac_ended = !mac_ended;
+        temp_8 &= mac_ended;
+        temp_8 &= b;
+        // temp2_8 = (u8)[rotated_mac + j];
+        temp2_8 = rotated_mac[(int)j];
+        temp2_8 |= temp_8;
+        // (u8)[rotated_mac + j] = temp2_8;
+        rotated_mac[(int)j] = temp2_8;
+        j += 1;
+        temp = constant_time_lt(j, md_size);
+        j &= temp;
+
+        i += 1;
+    }
+
+    // div_spoiler fix 
+    div_spoiler = md_size;
+    div_spoiler >>= 1;
+    div_spoiler <<= 57;
+    rotate_offset = div_spoiler;
+    rotate_offset += mac_start;
+    rotate_offset -= scan_start;
+    rotate_offset = rotate_offset % md_size;
+
+
+    // Now rotate the MAC 
+    j = 0;
+    i = 0;
+    while (i < md_size) {
+      temp_8 = rotated_mac[(int)rotate_offset];
+      rotate_offset += 1;
+      (u8)[out + j] = temp_8;
+      temp = constant_time_lt(rotate_offset, md_size);
+      rotate_offset &= temp;
+      i += 1;
+    }
+  }

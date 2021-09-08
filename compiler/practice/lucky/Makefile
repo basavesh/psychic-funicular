@@ -1,8 +1,8 @@
 JASMIN=../../jasminc
 JFLAGS=-lea
 
-main: main.c encrypt.s
-	gcc -Wall -Wextra -Wpedantic main.c encrypt.s -o $@
+main: main.c lucky.s
+	gcc -Wall -Wextra -Wpedantic main.c lucky.s -o $@
 
 %.s: %.japp
 	$(JASMIN) -o $@ $(JFLAGS) $^
